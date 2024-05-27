@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+  <title>徐德正物联网</title>
+
+  <!---->
+  <script src="jquery.min.js"></script>
+<script src="knob.js"></script>
+
+<script>
+    $('.dial').trigger(
+        'configure',
+        {
+            "min":0,
+            "max":100,
+            "width":150,
+    	    "fgColor":"#ffec03",
+    	    "skin":"tron",
+    	    "thickness":0.2,
+    	    "displayPrevious":true,
+            "cursor":true
+        }
+    );
+</script>
+<!---->
+</head>
+
+<body>
+<center>
+<img src="/img/jilindaxue.jpg" alt="吉林大学"></a>
+
+
+<div id="demo">
+<h1>智能家居控制——吉林大学徐德正</h1>
+ <br>
+  <button type="button" onclick="sendData(1)">点亮 LED</button>
+  <button type="button" onclick="sendData(0)">关闭 LED</button><br>
+</div>
+
+
+<div>
+  灯状态 : <span id="LEDState">NA</span><br>
+</div>
+
+<div id="demo">
+   <br>
+    <button type="button" onclick="sendData1(1)">打开风扇</button>
+    <button type="button" onclick="sendData1(0)">关闭风扇</button><br>
+  </div>
+
+<div>
+通风装置状态：<span id="fanState">NA</span><br>
+</div>
+
+
+<div id="demo">
+  <br>
+   <button type="button" onclick="sendData2(1)">开门</button>
+   <button type="button" onclick="sendData2(0)">关门</button><br>
+ </div>
+
+<div>
+门开关状态：<span id="doorState">NA</span><br>
+</div>
+
+<!---->
+<h1>PWM调光亮度</h1>
+<input type="text" class="dial" value="75" data-displayPrevious=true data-fgColor="#00A8A9" data-thickness=.3 value="29">
+
+<script>
+    $(".dial").knob({
+        'change' : function (v) { console.log(Math.round(v,0));    
+		$.ajax({url: "/setLED1?pwm="+Math.round(v,0), success: function(result){
+        		$("#div1").html(result);
+    		}});
+	}
+    });
+	
+
+</script>
+<!---->
+
+
+<br><br>
+<div id="demo">
+<h1>以下为光照变化实时读数</h1>
+<div>
+    室外光照 : <span id="ADCValue">0</span><br>
+</div>
+
+<br><br>
+<div id="demo">
+<h1>以下为温度变化实时读数</h1>
+<div>
+    室外温度 : <span id="wsValue">0</span><br>
+</div>
+
+<script>
+function sendData(led) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("LEDState").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "setLED?LEDstate="+led, true);
+  xhttp.send();
+}
+
+
+
+function sendData1(fan) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("fanState").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "setfan?fanstate="+fan, true);
+  xhttp.send();
+}
+ 
+
+function sendData2(door) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("doorState").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "setdoor?doorstate="+door, true);
+  xhttp.send();
+}
+
+
+setInterval(function() {
+  // Call a function repetatively with 2 Second interval
+  getData3();
+}, 2000); //2000mSeconds update rate
+ 
+function getData3() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("ADCValue").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "readADC", true);
+  xhttp.send();
+}
+
+
+setInterval(function() {
+  // Call a function repetatively with 2 Second interval
+  getData4();
+}, 2000); //2000mSeconds update rate
+ 
+function getData4() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("wsValue").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "readws", true);
+  xhttp.send();
+}
+</script>
+</center>
+</body>
+</html>
